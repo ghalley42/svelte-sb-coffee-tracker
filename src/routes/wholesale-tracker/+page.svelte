@@ -2,8 +2,6 @@
     import * as Table from '$lib/components/ui/table'
     import { productRows, productCategories } from '$lib/commonVariables.js';
     import WholesaleRow from '$lib/components/WholesaleRow.svelte';
-	import WholesaleDateBar from '@/components/WholesaleDateBar.svelte';
-	import { CableIcon } from 'lucide-svelte';
 
     export let data;
 
@@ -29,7 +27,7 @@
 
 
 </script>
-<WholesaleDateBar />
+
 <Table.Root>
     <Table.Caption>Wholesale Customer Sales by Period</Table.Caption>
     <Table.Header>
