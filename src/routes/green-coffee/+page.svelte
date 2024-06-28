@@ -1,5 +1,9 @@
 <script lang="ts">
-   import { Button } from '$lib/components/ui/button'
+    export let data;
+    import { Button } from '$lib/components/ui/button'
+    import GreenCoffeeDisplay from '@/components/GreenCoffeeDisplay.svelte';
+    
+    const greenCoffees = Array.from(data.greenCoffeeData).map(e => e.origin);
 
     let currentScreen;
 
@@ -12,14 +16,15 @@
 <div class="topbar">
     <h1>Green Coffee</h1>
     <div class="menu-div">
+       <Button on:click={changeScreen}>Current <i class="baseline-data_usage"></i></Button>
        <Button on:click={changeScreen}>Forecast</Button>
        <Button on:click={changeScreen}>Stock/Reserve</Button>
        <Button on:click={changeScreen}>Future</Button>
     </div>
 
 </div>
-<p>{currentScreen}</p>
 
+<GreenCoffeeDisplay {currentScreen} currentGreenCoffees={greenCoffees} />
 
 <style>
     .topbar {
