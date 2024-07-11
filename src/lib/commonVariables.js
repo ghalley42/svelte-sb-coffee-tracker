@@ -22,3 +22,14 @@ export const productRows = [
     {"code" : 'S_KEG', "name" : "Flavor Keg", "category" : "nitro keg"},
 ]
 export const productCategories = ["5 lb", "10 oz", "1 lb", "barrel aged", "nitro keg"];
+
+export const formatDate = (date) => {
+    if (date == undefined) return;
+    let month = date.getMonth() + 1;
+    month = month.toString()
+    return [date.getFullYear(), month.padStart(2, '0'), date.getDate().toString().padStart(2, '0')].toString().replaceAll(',','-')
+}
+
+export const filterByDateRange = (array, start, end) => {
+    return array.filter(e => new Date(e.date) >= new Date(formatDate(start)) && new Date(e.date) <= new Date(formatDate(end)))
+}

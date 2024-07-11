@@ -2,23 +2,19 @@
     export let data;
     import { Button } from '$lib/components/ui/button'
     import { afterUpdate } from 'svelte';
+    import { formatDate, filterByDateRange } from '@/commonVariables.js';
+	import Averages from '$lib/components/Averages.svelte';
 
 
     const greenCoffees = Array.from(data.greenCoffeeData).map(e => e.origin);
-    const blends = Array.from(data.blendData);
+    const blends = Array.from(data.blendData).map(e => e.name);
     const orders = Array.from(data.orderData);
     const products = Array.from(data.productData);
-
-    const formatDate = (date) => {
-        if (date == undefined) return;
-        let month = date.getMonth() + 1;
-        month = month.toString()
-        return [date.getFullYear(), month.padStart(2, '0'), date.getDate().toString().padStart(2, '0')].toString().replaceAll(',','-')
+    
+    let totals = {
+        Blacksmith: 200
     }
-
-    const filterByDateRange = (array, start, end) => {
-        return array.filter(e => new Date(e.date) >= new Date(formatDate(start)) && new Date(e.date) <= new Date(formatDate(end)))
-    }
+    
 
     const sumBlendTotal = (blend, orderList) => {
         let productList = products.filter(e => e.description == blend);
@@ -27,8 +23,8 @@
         }, 0)
     };
 
-    let startDate;
     let endDate = new Date();
+    let startDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 30);
     let currentScreen;
     let bsTotal: number;
     let months: number;
@@ -43,7 +39,7 @@
 
     const changeDate = (e) => {
         months = Number(e.srcElement.id);
-        startDate = new Date(new Date().setDate(-Number(e.srcElement.id) * 30));
+        startDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() + (- Number(e.srcElement.id) * 30));
     }
 
 </script>
@@ -57,6 +53,8 @@
        <Button id="6" on:click={changeDate}>Past 6 Months</Button>
     </div>
 
+<Averages blendList={blends} totals={totals} />
+
 </div>
 
 <!-- <GreenCoffeeDisplay {currentScreen} currentGreenCoffees={greenCoffees} /> -->
@@ -65,24 +63,15 @@
 <p>10oz BS Bags: {filterByDateRange(orders, startDate, endDate).filter(o => o.item == 'BS_10OZ').reduce((total, item) => {return total + item.qty}, 0)}</p>
 <p>{bsTotal} total lbs of BS is {Math.ceil(bsTotal / 50)} batches over {months * 4} weeks or {(Math.ceil(bsTotal / 50) / (months * 4)).toFixed(2)} batches per week!</p>
 
-<!-- {#each blends as blend}
-<h3 style="font-weight: 800">{blend.name}</h3>
-<ul>
-    {#each greenCoffees as coffee}
-    {#if blend.recipe[coffee] != undefined}
-    <li>{coffee}: {blend.recipe[coffee]} lbs per batch</li>
-    {/if}
-    {/each}
-</ul>
-{/each} -->
 <style>
     .topbar {
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding-bottom: 100px;
     }
 
     h1 {
         font-size: 2em;
     }
-</style>
+    </style>

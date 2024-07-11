@@ -1,6 +1,6 @@
 <script lang='ts'>
     import * as Table from '$lib/components/ui/table'
-    import { productRows, productCategories } from '$lib/commonVariables.js';
+    import { productRows, productCategories, formatDate, filterByDateRange } from '$lib/commonVariables.js';
     import WholesaleRow from '$lib/components/WholesaleRow.svelte';
 	import Button from '@/components/ui/button/button.svelte';
 
@@ -11,22 +11,12 @@
     let endDate = new Date();
     let startDate = setStartDate(endDate);
 
-    const formatDate = (date) => {
-        let month = date.getMonth() + 1;
-        month = month.toString()
-        return [date.getFullYear(), month.padStart(2, '0'), date.getDate().toString().padStart(2, '0')].toString().replaceAll(',','-')
-    }
-
     const changeWeek = (e) => {
         if (e.target.innerText == 'Previous Week') endDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 7);
         if (e.target.innerText == 'Next Week') endDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() + 7);
         startDate = setStartDate(endDate);
         currentOrders = filterByDateRange(orders, startDate, endDate);
         currentCustomers = customerList.filter(e => getTotals(e) != 0).sort();
-    }
-
-    const filterByDateRange = (array, start, end) => {
-        return array.filter(e => new Date(e.date) >= new Date(formatDate(start)) && new Date(e.date) <= new Date(formatDate(end)))
     }
 
     const getTotals = (customer) => filterByDateRange(orders, startDate, endDate).filter(e => e.customer_name == customer).reduce((total, currentValue) => total + currentValue.qty, 0)
@@ -51,7 +41,7 @@
 </div>
 
 <Table.Root>
-    <Table.Caption>Wholesale Customer Sales by Period</Table.Caption>
+    <Table.Caption>Total Sales by Period</Table.Caption>
     <Table.Header>
         <Table.Row>
             <Table.Head rowspan="2">CUSTOMER</Table.Head>
