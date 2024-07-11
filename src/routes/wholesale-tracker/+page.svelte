@@ -2,8 +2,14 @@
     import * as Table from '$lib/components/ui/table'
     import { productRows, productCategories } from '$lib/commonVariables.js';
     import WholesaleRow from '$lib/components/WholesaleRow.svelte';
+	import Button from '@/components/ui/button/button.svelte';
 
     export let data;
+
+    const setStartDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
+
+    let endDate = new Date();
+    let startDate = setStartDate(endDate);
 
     const formatDate = (date) => {
         let month = date.getMonth() + 1;
@@ -11,7 +17,13 @@
         return [date.getFullYear(), month.padStart(2, '0'), date.getDate().toString().padStart(2, '0')].toString().replaceAll(',','-')
     }
 
-    const setStartDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7);
+    const changeWeek = (e) => {
+        if (e.target.innerText == 'Previous Week') endDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 7);
+        if (e.target.innerText == 'Next Week') endDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() + 7);
+        startDate = setStartDate(endDate);
+        currentOrders = filterByDateRange(orders, startDate, endDate);
+        currentCustomers = customerList.filter(e => getTotals(e) != 0).sort();
+    }
 
     const filterByDateRange = (array, start, end) => {
         return array.filter(e => new Date(e.date) >= new Date(formatDate(start)) && new Date(e.date) <= new Date(formatDate(end)))
@@ -21,12 +33,22 @@
 
     const customerList = Array.from(data.customerData).map(e => e.name);
     const orders = Array.from(data.orderData);
-    let endDate = new Date(2024, 4, 15);
-    let startDate = setStartDate(endDate);
+
+    let currentOrders = filterByDateRange(orders, startDate, endDate);
+    let currentCustomers = customerList.filter(e => getTotals(e) != 0).sort();
+   
     
 
 
 </script>
+
+<div class="topbar">
+    <h2>{formatDate(startDate)} to {formatDate(endDate)}</h2>
+</div>
+<div class="change-week">
+    <Button on:click={changeWeek}>Previous Week</Button>
+    <Button on:click={changeWeek}>Next Week</Button>
+</div>
 
 <Table.Root>
     <Table.Caption>Wholesale Customer Sales by Period</Table.Caption>
@@ -44,16 +66,10 @@
         </Table.Row>
     </Table.Header>
     <Table.Body>
-        {#each customerList as customer}
-        {#if getTotals(customer) != 0}
-        <WholesaleRow customer={customer} orders={filterByDateRange(orders, startDate, endDate)} itemList={Array.from(productRows).map(e => e.code)}/>
-        {/if}
+        {#each currentCustomers as customer}
+        <WholesaleRow customer={customer} orders={currentOrders} itemList={Array.from(productRows).map(e => e.code)}/>
         {/each}
+        <WholesaleRow customer='Website/Other' orders={currentOrders.filter(e => !customerList.some(cust => cust == e.customer_name))} itemList={Array.from(productRows.map(e => e.code))}/>
+        <WholesaleRow customer='Total' orders={currentOrders} itemList={Array.from(productRows).map(e => e.code)}/>
     </Table.Body>
 </Table.Root>
-<h2>Customers Who Didn't Order:</h2>
-{#each customerList as customer}
-{#if getTotals(customer) == 0}
-<p>{customer}</p>
-{/if}
-{/each}

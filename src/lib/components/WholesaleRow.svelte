@@ -7,11 +7,20 @@
 </script>
 
 <Table.Row>
-    <Table.Cell>{customer}</Table.Cell>
+    <Table.Cell style="font-weight: 800">{customer}</Table.Cell>
     {#each itemList as i}
-    <Table.Cell>
-        {orders.filter(e => e.customer_name == customer).filter(f => f.item == i).reduce((total, currentValue) => total + currentValue.qty, 0)}
-    </Table.Cell>
+    {#if customer == "Total"}
+        <Table.Cell style="font-weight: 600; text-align: center">
+            {orders.filter(f => f.item == i).reduce((total, currentValue) => total + currentValue.qty, 0)}
+        </Table.Cell>
+    {:else if customer == "Website/Other"}
+        <Table.Cell style="text-align: center">
+            {orders.filter(f => f.item == i).reduce((total, currentValue) => total + currentValue.qty, 0)}
+        </Table.Cell>
+    {:else}
+        <Table.Cell style="text-align: center; border-right">
+            {orders.filter(e => e.customer_name == customer).filter(f => f.item == i).reduce((total, currentValue) => total + currentValue.qty, 0)}
+        </Table.Cell>
+    {/if}
     {/each}
 </Table.Row>
-
