@@ -4,7 +4,9 @@
     const greenCoffees = data.greenCoffeeData;
     const orders = data.orderData;
 
-    
+    const addToTotal = (order) => {
+        if (orders.item.includes('5LB')) order.qty
+    }
 
 </script>
 
