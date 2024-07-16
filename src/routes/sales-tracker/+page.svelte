@@ -6,9 +6,11 @@
 
     export let data;
 
-    const setStartDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
+    const setStartDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate() - 6);
+    const mostRecentSaturday = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDay() > 2 ? date.getDate() + (6 - date.getDay()) : date.getDate() - (date.getDay() + 1));
 
-    let endDate = new Date();
+
+    let endDate = mostRecentSaturday(new Date());
     let startDate = setStartDate(endDate);
 
     const changeWeek = (e) => {
