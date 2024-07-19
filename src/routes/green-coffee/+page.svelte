@@ -3,7 +3,6 @@
     import { Button } from '$lib/components/ui/button'
     import { afterUpdate } from 'svelte';
     import { formatDate, filterByDateRange } from '@/commonVariables.js';
-    import { ordersOneMonth } from '@/store.js';
 	import Averages from '$lib/components/Averages.svelte';
 
 
@@ -57,9 +56,6 @@
 <Averages blendList={blends} totals={totals} />
 
 </div>
-
-<p>{$ordersOneMonth}</p>
-
 
 <!-- <GreenCoffeeDisplay {currentScreen} currentGreenCoffees={greenCoffees} /> -->
 <p>{formatDate(startDate)} to {formatDate(endDate)}</p>
