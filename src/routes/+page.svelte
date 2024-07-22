@@ -1,51 +1,90 @@
 <script lang="ts">
-	import { filterByDateRange } from '@/commonVariables';
+	import { filterByDateRange, buildAccumulator } from '@/commonVariables';
 
     export let data;
+
+    type Blends = {
+        blacksmith?: number;
+        embers?: number;
+        espressomatica?: number;
+        "mocha java"?: number;
+        decaf?: number;
+        "old school"?: number;
+        "italian roast"?: number;
+    }
+    
+    type Order = {
+        order_line_id: number;
+        date: string;
+        customer_name: string;
+        item: string;
+        qty: number;
+    }
+
+    type Product = {
+        code: string;
+        description: string;
+        category: string;
+        multiplier: number;
+        base: Blends;
+    }
 
     const greenCoffees = Array.from(data.greenCoffeeData);
     const orders = Array.from(data.orderData);
     const blends = Array.from(data.blendData);
     const products = Array.from(data.productData);
-    
-    const buildAccumulator = (array, specifier) => {
-        let theAccumulator = new Object();
-        array.map(e => theAccumulator[e[specifier]] = 0);
-        return theAccumulator;
-    }
 
-    let orderAccumulator = buildAccumulator(products, 'code');
-    let greenAccumulator = buildAccumulator(greenCoffees, 'origin')
-    let product, amount;
+    let orderAccumulator:any = buildAccumulator(products, 'code');
+    let blendAccumulator:any = buildAccumulator(blends, 'name');
+    let batchAccumulator:any = buildAccumulator(greenCoffees, 'origin');
+    let product: string, amount: number;
+    let dateRange = {'start date': '', 'end date': ''};
 
-    const getRecipe = (item) => {
-         let theProduct = products.filter(e => e.code == item);
-         let theBlends = Object.keys(theProduct[0]["base"]);
-         let o = new Object();
-         theBlends.forEach(e => o[e] = Number(theProduct[0]["base"][e]))
-         return o;
-         };
+    const getRecipe = (order: Order) => products.filter(e => e.code == order.item)[0]['base'];
+    const getKeys = (order: Order) => Object.keys(products.filter(e => e.code == order.item)[0]["base"]);
 
-    const getKeys = (item) => {
-        return Object.keys(products.filter(e => e.code == item)[0]["base"]);
-    } 
-
-    const addToTotal = (order) => {
-
-        if (order.item.includes('5LB')) return order.qty * 1;
-    }
-
-    const categoryCheck = (product) => {
+    const categoryCheck = (product: Product) => {
         return product.category == "5 lb" || product.category == "10 oz" || product.category == "1 lb" ? product.category : "";
     }   
 
-    const sumOrdersByItem = (e) => {
-        e.forEach(order => orderAccumulator[order.item] += order.qty);
+    const sumOrdersByItem = (orders: Array<any>, accumulator: any ) => {
+        orders.forEach(order => accumulator[order.item] += order.qty);
     };
 
-    sumOrdersByItem(filterByDateRange(orders, new Date(2024, 6, 1), new Date(2024, 6, 13)));
-    console.log(orderAccumulator)
-    console.log(greenAccumulator)
+    const accumulateBatches = (accumulatedBlends:any , accumulator: any) => {
+        let batchObject = JSON.parse(JSON.stringify(accumulatedBlends))
+        blends.forEach(blend => batchObject[blend.name] = batchObject[blend.name] / 50)
+        // Object.keys(accumulatedBlends).forEach(blend => {
+        //     console.log(blends.filter(e => e.name == blend)[0].recipe);
+        // });
+
+        let greens = greenCoffees.map(e => e.origin);
+        Object.keys(batchObject).forEach(blend => {
+            let theRecipe = blends.filter(e => e.name == blend)[0].recipe;
+            greens.forEach(green => {
+                if (theRecipe[green] > 1) accumulator[green] += Number((batchObject[blend] * theRecipe[green]).toFixed(3));
+            })
+        })
+    }
+
+    const sumBlendsTotalLbs = (accumulatedOrders: any, accumulator: any) => {
+        Object.keys(accumulatedOrders).forEach(order => {
+            let theProduct = products.filter(e => e.code == order)[0]
+            let theMultiplier = Number(theProduct.multiplier);
+            let theBlends = Object.keys(theProduct.base).map(blend => blends.filter(e => e.name == blend));
+            let blendRecipe:any = new Object();
+            theBlends.forEach(x => blendRecipe[x[0]["name"]] = theProduct.base[x[0]["name"]])
+            theBlends.forEach(blend => {
+               accumulator[blend[0]["name"]] += Number(accumulatedOrders[order]) * Number(theProduct.base[blend[0]['name']] / 100) * (theMultiplier / 1000);
+            })
+        })
+    }
+
+    sumOrdersByItem(filterByDateRange(orders, new Date(2024, 6, 1), new Date(2024, 6, 20)), orderAccumulator);
+  
+
+    sumBlendsTotalLbs(orderAccumulator, blendAccumulator);
+    accumulateBatches(blendAccumulator, batchAccumulator);
 </script>
 
 
@@ -68,3 +107,11 @@
     <br>
 
 </div>
+<div style="padding-bottom: 100px;">
+    {#each blends as blend (blend.name)}
+    <p>{blend.name}: {Math.floor(blendAccumulator[blend.name])}</p>
+    {/each}
+</div>
+{#each greenCoffees as green (green.origin)}
+<p>{green.origin}: {batchAccumulator[green.origin]}</p>
+{/each}

@@ -33,3 +33,9 @@ export const formatDate = (date) => {
 export const filterByDateRange = (array, start, end) => {
     return array.filter(e => new Date(e.date) >= new Date(formatDate(start)) && new Date(e.date) <= new Date(formatDate(end)))
 }
+
+export const buildAccumulator = (array, specifier) => {
+    let theAccumulator = new Object();
+    array.map(e => theAccumulator[e[specifier]] = 0);
+    return theAccumulator;
+}
