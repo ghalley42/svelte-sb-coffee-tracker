@@ -80,7 +80,7 @@
         })
     }
 
-    sumOrdersByItem(filterByDateRange(orders, new Date(2024, 6, 1), new Date(2024, 6, 20)), orderAccumulator);
+    sumOrdersByItem(filterByDateRange(orders, new Date(2024, 5, 1), new Date(2024, 6, 20)), orderAccumulator);
   
 
     sumBlendsTotalLbs(orderAccumulator, blendAccumulator);

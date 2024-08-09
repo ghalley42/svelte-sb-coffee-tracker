@@ -3,6 +3,7 @@
 </script>
 <div class="main">
 	<div class="sidebar-menu">
+		<a href="/">Home</a>
 		<a href="/blends">Blends</a>
 		<a href="/sales-tracker">Sales Tracker</a>
 		<a href="/green-coffee">Green Coffee</a>
